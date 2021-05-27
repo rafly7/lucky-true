@@ -1,0 +1,134 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Nunito", sans-serif;
+}
+
+ .spinButton {
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 15px 0;
+  color: #fff;
+  font-size: 16px;
+  letter-spacing: 1px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.btnEnabled {
+  background: #603bbb;
+}
+
+.btnDisabled {
+  background: #bdc3c7;
+}
+
+.nameLabel {
+  display: block;
+  text-align: left;
+  color: white;
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.dialogCustom .MuiPaper-root {
+  background-color: transparent;
+  box-shadow: 0px 0px transparent;
+  color: #fff;
+  font-size: 30px;
+}
+
+.nameInput {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 19px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+  color: #fff;
+  border-radius: 10px;
+}
+
+.nameInput::placeholder {
+  color: #fff;
+}
+
+.addButton {
+  background: white;
+  color: #603bbb;
+  margin-bottom: 20px;
+  border-color: #603bbb;
+  border-radius: 10px;
+}
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 0 20px;
+  display: flex;
+}
+
+.container .subContainer {
+  padding: 60px;
+  margin: auto;
+  width: 100%;
+  max-width: 520px;
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #EB4D4B;
+  /* background: radial-gradient(
+    ellipse at left bottom,
+    rgba(235, 77, 75, 1) 0%,
+  ); */
+  box-shadow: 0 50px 70px -20px rgba(0, 0, 0, 0.8);
+}
+
+.container {
+  color: white;
+  margin: 14px 0;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.container {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 19px;
+  padding: 10px;
+  letter-spacing: 1px;
+}
+
+.subContainer  {
+  width: 100%;
+  padding: 24px 0;
+  border-radius: 20px;
+}
+
+.container  {
+  margin: 14px 0 0 0;
+  text-align: right;
+}
+
+.container  {
+  color: yellow;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin-left: 5px;
+  transition: all 400ms ease-in-out;
+}
+
+.result {
+  color: #fff;
+  font-size: 40px;
+  text-align: center;
+}
+
+.result-name {
+  padding-bottom: 15px;
+}
