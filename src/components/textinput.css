@@ -1,0 +1,26 @@
+.textfield {
+  padding: 10px;
+  border: 3px solid black;
+  border-radius: 5px;
+  outline: none;
+}
+
+.wrapper {
+  display: block;
+}
+
+.placeholder {
+  position: absolute;
+  left: 9px;
+  top: 13px;
+  padding: 0 4px;
+  background-color: #F7F1E5;
+  transform-origin: top left;
+  transition: all 120ms ease-in;
+}
+
+.textfield:focus + .placeholder, .textfield:not(:placeholder-shown) .placeholder {
+  top: -5px;
+  transform: scale(0.8);
+  font-weight: bold;
+}

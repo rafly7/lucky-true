@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from "react"
-import Axios from 'axios'
+import { useState } from "react"
+import styled from 'styled-components'
 import { useHistory } from "react-router-dom"
 import {
   Container,
@@ -14,13 +14,19 @@ import {
   FormControlLabel,
   Checkbox,
   Button,
-  Typography
+  Typography,
+  AppBar,
+  Toolbar,
+  IconButton,
+  makeStyles
 } from '@material-ui/core'
 import SettingsIcon from '@material-ui/icons/Settings';
 
 import { getRole, getToken } from "../localstorage"
 import { useTitle } from "../components/title"
 import { range, without } from 'lodash'
+import MenuIcon from '@material-ui/icons/Menu';
+import { ResultNameWinner } from "../components/ResultNameWinner"
 
 function getRandomInt(min, max) {
   const _min = Math.ceil(min);
@@ -47,8 +53,48 @@ function uniqFast(a) {
 
 function dateTimeFormat() {
   const d = new Date()
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`
+  let month = d.getMonth().toString()
+  let date = d.getDate().toString()
+  let hours = d.getHours().toString()
+  let minutes = d.getMinutes().toString()
+  let seconds = d.getSeconds().toString()
+  if (month.length < 2)
+    month = `0${month}`
+  if (date.length < 2)
+    date = `0${date}`
+  if (hours.length < 2)
+    hours = `0${hours}`
+  if (minutes.length < 2)
+    minutes = `0${minutes}`
+  if (seconds.length < 2)
+    seconds = `0${seconds}`
+  return `${d.getFullYear()}-${month}-${date} ${hours}:${minutes}:${seconds}`
 }
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  menuButton: {
+    marginRight: theme.spacing(2),
+  },
+  title: {
+    flexGrow: 1,
+  },
+}));
+
+const ButtonCustom = styled.p`
+  &:hover {
+    color: blue
+  }
+  cursor: pointer
+`
+const ClearResults = styled.h4`
+  &:hover {
+    color: blue
+  }
+  cursor: pointer
+`
 
 export default function Index() {
   let listName;
@@ -97,11 +143,11 @@ export default function Index() {
 
   const {remove_name, same_names, split_names, filter_duplicate, add_information} = stateOptions
 
-  useEffect(() => {
-    if ((getToken() !== null && getRole() !== 'Administrator') || getToken() === null) {
-      history.push('/auth')
-    }
-  },)
+  // useEffect(() => {
+  //   if ((getToken() !== null && getRole() !== 'Administrator') || getToken() === null) {
+  //     history.push('/auth')
+  //   }
+  // },)
 
   const handleDropDown = (event) => {
     setNumWinner(event.target.value)
@@ -149,10 +195,10 @@ export default function Index() {
         if (arrEmpty.length === numWinner) {
           break
         } else if (same_names && numWinner > 1) {
-          console.log('SAME NAMES WINNER')
+          // console.log('SAME NAMES WINNER')
           arrEmpty.push(result)
         } else {
-          console.log('NOT SAME NAME')
+          // console.log('NOT SAME NAME')
           arrEmpty.push(result)
           arrEmpty = uniqFast(arrEmpty)
         }
@@ -163,9 +209,19 @@ export default function Index() {
     setNameParticipants(listName.join('\n'))
     setListWinner(val => val.concat({result: arrEmpty.join(' '), length: oldLength, dateTime: dateTimeFormat()}))
   }
+  const classes = useStyles();
 
   return (
     <>
+    <AppBar position="static" style={{backgroundColor: '#e74c3c'}}>
+      <Container component="div" maxWidth="lg" style={{ paddingLeft: "10px" }}>
+      <Toolbar>
+        <Typography variant="h6" className={classes.title}>
+          SAMANTHA
+        </Typography>
+      </Toolbar>
+      </Container>
+    </AppBar>
     <Container component='div' maxWidth='lg'>
       <Grid container>
         <Grid container item lg={12} md={12} sm={12} xs={12}>
@@ -175,6 +231,7 @@ export default function Index() {
             multiline
             rows={9}
             value={nameParticipants}
+            style={{marginTop: '20px'}}
             onChange={handleListName}
             placeholder='Name 1, Name 2, Name 3, ...'
             variant='outlined'
@@ -187,7 +244,7 @@ export default function Index() {
             <p>Number of names: <span style={{fontWeight: 'bold'}}>{listName.length}</span></p>
           </div>
           <div style={{display: 'flex', width: '100%'}}>
-            <p><span style={{fontStyle: 'italic'}}>Remove all names from list</span> <span style={{color: 'blue'}}>X</span></p>
+            <ButtonCustom onClick={() => setNameParticipants('')}><span style={{fontStyle: 'italic'}}>Remove all names from list</span> <span style={{color: 'blue'}}>X</span></ButtonCustom>
           </div>
           <div style={{display: 'flex', width: '100%', color: 'blue', alignItems: 'center'}}>
             <SettingsIcon/>
@@ -214,7 +271,12 @@ export default function Index() {
                 control={<Checkbox checked={remove_name} onChange={handleCheckBox} name='remove_name'/>}
                 label='Remove name from list of names after drawing winner'/>
               <FormControlLabel
-                control={<Checkbox checked={same_names} onChange={handleCheckBox} name='same_names'/>}
+                style={{cursor: numWinner < 2 && 'not-allowed', color: numWinner < 2 && '#ecf0f1'}}
+                control={
+                  numWinner < 2 
+                  ? <Checkbox checked={same_names} name='same_names' style={{cursor: 'not-allowed', color: '#ecf0f1'}}/>
+                  : <Checkbox checked={same_names} onChange={handleCheckBox} name='same_names'/>
+                }
                 label='Same name/winner possible in one draw (when using multiple winners)'/>
               <FormControlLabel
                 control={<Checkbox checked={split_names} onChange={handleCheckBox} name='split_names'/>}
@@ -253,32 +315,40 @@ export default function Index() {
             />
           </>
           }
-          <Button style={{marginBottom: '20px'}} color='primary' variant='outlined' onClick={handleRandomName}>Pick random name(s)</Button>
           </Grid>
+          <Button fullWidth style={{color: listName.length < 2 && '#bdc3c7', borderColor: listName.length < 2 && '#bdc3c7' ,marginTop: '20px',marginBottom: '20px', cursor: listName.length < 2 && 'not-allowed'}} color='secondary' variant='outlined' onClick={listName.length > 1 && handleRandomName}>Pick random name(s)</Button>
       </Grid>
     </Container>
-    <Container style={{backgroundColor: 'red', marginBottom: '20px'}} component='div' maxWidth='lg'>
+    <Container component='div' maxWidth='lg'>
+      <div style={{display: 'flex', flexGrow: '1', alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'}}>
       <Typography variant='h5'>Winners Name Picker</Typography>
-      <Typography variant='h4'></Typography>
+      {listWinner.length !== 0 &&
+        <ClearResults onClick={() => setListWinner([])} style={{display: 'inline', justifyContent: 'end', fontWeight: 'normal', fontStyle: 'italic'}}>Clear results <span style={{color: 'blue'}}>X</span></ClearResults>
+      }
+      </div>
+      {listWinner.length === 0 && <Typography display='block' variant='body1'>Empty</Typography>}
     </Container>
     {listWinner.length > 0 &&
       listWinner.map((val, index) => {
         return (
           <Container key={index}>
             {index === 0 ?
-            <>
-              <Typography variant='h5' style={{backgroundColor: 'yellow'}}>{listWinner[listWinner.length-index-1].result}</Typography>
-              <Typography variant='h6' style={{backgroundColor: 'yellow'}}>Total name: {listWinner[listWinner.length-index-1].length} {listWinner[listWinner.length-index-1].dateTime}</Typography>
-            </>
-            : <> 
-            <Typography variant='h5'>{listWinner[listWinner.length-index-1].result}</Typography>
-            <Typography variant='h6'>Total name: {listWinner[listWinner.length-index-1].length} {listWinner[listWinner.length-index-1].dateTime}</Typography>
-            </>
-          }
-            {/* <Typography variant='h5'>{listWinner[listWinner.length-index-1].result}</Typography>
-            <Typography variant='h6'>Total name: {listWinner[listWinner.length-index-1].length} {listWinner[listWinner.length-index-1].dateTime}</Typography> */}
-            {/* <Typography variant='h5'>{val.result}</Typography>
-            <Typography variant='h6'>Total name: {val.length} {val.dateTime}</Typography> */}
+              <div style={{padding: '10px', borderRadius: '20px', backgroundColor: '#e74c3c', marginBottom: '20px'}}>
+                <ResultNameWinner listWinner={listWinner} index={index}/>
+                <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                  <Typography display='inline' variant='h6' style={{color: 'white', marginTop: '10px'}}>Total names: {listWinner[listWinner.length-index-1].length}</Typography>
+                  <Typography display='inline' variant='h6' style={{color: 'white', marginTop: '10px'}}>{listWinner[listWinner.length-index-1].dateTime}</Typography>
+                </div>
+              </div>
+            : 
+            <div style={{marginBottom: '20px', padding: '10px', borderColor: 'black', borderStyle: 'solid', borderRadius: '20px', borderWidth: '0.5px'}}> 
+              <Typography style={{marginBottom: '10px', fontWeight: 'bold'}} variant='body1'>{listWinner[listWinner.length-index-1].result}</Typography>
+              <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Typography display='inline' variant='body1'>Total names: {listWinner[listWinner.length-index-1].length}</Typography>
+                <Typography display='inline' variant='body1'>{listWinner[listWinner.length-index-1].dateTime}</Typography>
+              </div>
+            </div>
+            }
           </Container>
         )
       })
