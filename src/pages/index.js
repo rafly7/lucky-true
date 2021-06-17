@@ -9,7 +9,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  FormLabel,
   FormGroup,
   FormControlLabel,
   Checkbox,
@@ -17,16 +16,14 @@ import {
   Typography,
   AppBar,
   Toolbar,
-  IconButton,
   makeStyles
 } from '@material-ui/core'
 import SettingsIcon from '@material-ui/icons/Settings';
 
-import { getRole, getToken } from "../localstorage"
 import { useTitle } from "../components/title"
 import { range, without } from 'lodash'
-import MenuIcon from '@material-ui/icons/Menu';
-import { ResultNameWinner } from "../components/ResultNameWinner"
+import { ResultNameWinner, AfterNameWinner } from "../components/ResultNameWinner"
+import LogoBrand from '../assets/images/logo_samantha.png'
 
 function getRandomInt(min, max) {
   const _min = Math.ceil(min);
@@ -34,7 +31,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (_max - _min + 1)) + _min;
 }
 
-const dropdownList = [20, 25, 50, 100, 250, 500, 1000]
+const dropdownList = [10, 15, 20, 'Custom']
 
 function uniqFast(a) {
   const seen = {}
@@ -125,12 +122,13 @@ export default function Index() {
         return !val.includes(' ')
       }
     })
-    return res.concat(arrEmber)
+    return uniqFast(res.concat(arrEmber))
   }
 
   const arrE = []
   const history = useHistory()
   const [numWinner, setNumWinner] = useState(1)
+  const [customNumWinner, setCustomNumWinner] = useState(1)
   const [listWinner, setListWinner] = useState([])
   const [nameParticipants, setNameParticipants] = useState('')
   const [stateOptions, setStateOptions] = useState({
@@ -143,12 +141,6 @@ export default function Index() {
 
   const {remove_name, same_names, split_names, filter_duplicate, add_information} = stateOptions
 
-  // useEffect(() => {
-  //   if ((getToken() !== null && getRole() !== 'Administrator') || getToken() === null) {
-  //     history.push('/auth')
-  //   }
-  // },)
-
   const handleDropDown = (event) => {
     setNumWinner(event.target.value)
   }
@@ -158,7 +150,15 @@ export default function Index() {
   }
 
   const handleListName = (event) => {
-    setNameParticipants(event.target.value.trim())
+    setNameParticipants(event.target.value)
+  }
+
+  const handleCustomNumWinner = (event) => {
+    const val = event.target.value
+    if (Number(val) < 0) {
+      return
+    }
+    setCustomNumWinner(val)
   }
 
   useTitle('Home - lucky draw')
@@ -183,18 +183,15 @@ export default function Index() {
     listName = splitBySpace(listName)
   }
 
-  const handleRandomName = () => {
-    if (listName.length === 0 || listName.length < numWinner) {
-      return
-    }
+  const resultNameWinner = numNameWinner => {
     let arrEmpty = []
     const oldLength = listName.length
       for (;;) {
         const rand = getRandomInt(1, listName.length) - 1
         const result = listName[rand]
-        if (arrEmpty.length === numWinner) {
+        if (arrEmpty.length === numNameWinner) {
           break
-        } else if (same_names && numWinner > 1) {
+        } else if (same_names && numNameWinner > 1) {
           // console.log('SAME NAMES WINNER')
           arrEmpty.push(result)
         } else {
@@ -206,19 +203,38 @@ export default function Index() {
     if (remove_name) {
       listName = without(listName, ...arrEmpty)
     }
-    setNameParticipants(listName.join('\n'))
-    setListWinner(val => val.concat({result: arrEmpty.join(' '), length: oldLength, dateTime: dateTimeFormat()}))
+    if ((split_names && remove_name) || !split_names) {
+      setNameParticipants(listName.join('\n'))
+    }
+    setListWinner(val => val.concat({result: arrEmpty, length: oldLength, dateTime: dateTimeFormat()}))
+  }
+
+  const handleRandomName = () => {
+    if (numWinner === 'Custom') {
+      const val = Number(customNumWinner)
+      if (listName.length === 0 || listName.length < val || val === 0) {
+        return
+      } else {
+        resultNameWinner(val)
+      }
+    } else if (listName.length === 0 || listName.length < numWinner) {
+      return
+    } else {
+      resultNameWinner(numWinner)
+    }
   }
   const classes = useStyles();
+  // console.log(listName)
 
   return (
     <>
     <AppBar position="static" style={{backgroundColor: '#e74c3c'}}>
       <Container component="div" maxWidth="lg" style={{ paddingLeft: "10px" }}>
       <Toolbar>
-        <Typography variant="h6" className={classes.title}>
+        <img src={LogoBrand}  style={{width:'7%', height:'7%'}} />
+        {/* <Typography variant="h6" className={classes.title}>
           SAMANTHA
-        </Typography>
+        </Typography> */}
       </Toolbar>
       </Container>
     </AppBar>
@@ -226,7 +242,6 @@ export default function Index() {
       <Grid container>
         <Grid container item lg={12} md={12} sm={12} xs={12}>
           <TextField
-            id='outlined-multiline-static'
             label='List Names'
             multiline
             rows={9}
@@ -258,13 +273,26 @@ export default function Index() {
               value={numWinner}
               onChange={handleDropDown}
             >
-              {range(15).concat(dropdownList).map((val, index) => {
+              {range(5).concat(dropdownList).map((val, index) => {
                 return (
-                  <MenuItem value={val < 15 ? val+1: val} key={index}>{val < 15 ? val+1: val}</MenuItem>
+                  <MenuItem value={val < 5 ? val+1: val} key={index}>{val < 5 ? val+1: val}</MenuItem>
                 )
               })}
             </Select>
           </FormControl>
+          {numWinner === 'Custom' ?
+            <TextField
+              label='Custom Number'
+              type='number'
+              value={customNumWinner}
+              style={{marginTop: '20px'}}
+              onChange={handleCustomNumWinner}
+              placeholder='Number'
+              variant='outlined'
+              fullWidth
+            />
+            : <div/>
+          }
           <FormControl component='fieldset'>
             <FormGroup>
               <FormControlLabel
@@ -284,9 +312,9 @@ export default function Index() {
               <FormControlLabel
                 control={<Checkbox checked={filter_duplicate} onChange={handleCheckBox} name='filter_duplicate'/>}
                 label='Filter duplicate names'/>
-              <FormControlLabel
+              {/* <FormControlLabel
                 control={<Checkbox checked={add_information} onChange={handleCheckBox} name='add_information'/>}
-                label='Add contest information to results (title/intro/logo)'/>
+                label='Add contest information to results (title/intro/logo)'/> */}
             </FormGroup>
           </FormControl>
           {stateOptions.add_information &&
@@ -333,7 +361,7 @@ export default function Index() {
         return (
           <Container key={index}>
             {index === 0 ?
-              <div style={{padding: '10px', borderRadius: '20px', backgroundColor: '#e74c3c', marginBottom: '20px'}}>
+              <div style={{padding: '10px', borderRadius: '20px', backgroundColor: '#f54748', marginBottom: '20px'}}>
                 <ResultNameWinner listWinner={listWinner} index={index}/>
                 <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                   <Typography display='inline' variant='h6' style={{color: 'white', marginTop: '10px'}}>Total names: {listWinner[listWinner.length-index-1].length}</Typography>
@@ -342,7 +370,8 @@ export default function Index() {
               </div>
             : 
             <div style={{marginBottom: '20px', padding: '10px', borderColor: 'black', borderStyle: 'solid', borderRadius: '20px', borderWidth: '0.5px'}}> 
-              <Typography style={{marginBottom: '10px', fontWeight: 'bold'}} variant='body1'>{listWinner[listWinner.length-index-1].result}</Typography>
+              {/* <Typography style={{marginBottom: '10px', fontWeight: 'bold'}} variant='body1'>{listWinner[listWinner.length-index-1].result}</Typography> */}
+              <AfterNameWinner listWinner={listWinner} index={index}/>
               <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                 <Typography display='inline' variant='body1'>Total names: {listWinner[listWinner.length-index-1].length}</Typography>
                 <Typography display='inline' variant='body1'>{listWinner[listWinner.length-index-1].dateTime}</Typography>

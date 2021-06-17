@@ -1,5 +1,6 @@
 import Index from "../pages";
 import Auth from "../pages/auth";
+import { TimePage } from "../pages/time";
 
 export const Routes = [
   {
@@ -9,5 +10,9 @@ export const Routes = [
   {
     path: '/',
     main: () => <Index/>
+  },
+  {
+    path: '/time',
+    main: () => <TimePage/>
   }
 ]
