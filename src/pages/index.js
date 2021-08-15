@@ -258,12 +258,37 @@ export default function Index() {
           <div>
             <p>Number of names: <span style={{fontWeight: 'bold'}}>{listName.length}</span></p>
           </div>
-          <div style={{display: 'flex', width: '100%'}}>
+          <div style={{display: 'flex', width: '100%', marginTop: '-20px'}}>
             <ButtonCustom onClick={() => setNameParticipants('')}><span style={{fontStyle: 'italic'}}>Remove all names from list</span> <span style={{color: 'blue'}}>X</span></ButtonCustom>
           </div>
-          <div style={{display: 'flex', width: '100%', color: 'blue', alignItems: 'center'}}>
+          <div style={{display: 'flex', width: '100%', marginTop: '-25px'}}>
+            {listWinner.length !== 0 &&
+              <ClearResults onClick={() => setListWinner([])} style={{display: 'inline', justifyContent: 'end', fontWeight: 'normal', fontStyle: 'italic'}}>Clear results <span style={{color: 'blue'}}>X</span></ClearResults>
+            }
+          </div>
+
+          {listWinner.length > 0 ?
+            listWinner.map((val, index) => {
+              return (
+                <div key={index}>
+                  {index === 0 &&
+                    <div style={{padding: '10px', borderRadius: '20px', backgroundColor: '#f54748', marginBottom: '20px'}}>
+                      <ResultNameWinner listWinner={listWinner} index={index}/>
+                      <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                        <Typography display='inline' variant='h6' style={{color: 'white', marginTop: '10px'}}>Total winners: {listWinner[listWinner.length-index-1].result.length}</Typography>
+                        <Typography display='inline' variant='h6' style={{color: 'white', marginTop: '10px'}}>{listWinner[listWinner.length-index-1].dateTime}</Typography>
+                      </div>
+                    </div>
+                  }
+                  </div>
+              );
+            })
+            : <div/>
+          }
+
+          <div style={{display: 'flex', width: '100%', color: '#e74c3c', alignItems: 'center'}}>
             <SettingsIcon/>
-            <p style={{paddingLeft: '10px'}}>Name Picker Options</p>
+            <p style={{paddingLeft: '10px', color: '#e74c3c', fontWeight: '500'}}>Name Picker Options</p>
           </div>
           <FormControl variant='outlined' style={{width: '100%'}}>
             <InputLabel>Number of names/winners</InputLabel>
@@ -344,15 +369,15 @@ export default function Index() {
           </>
           }
           </Grid>
-          <Button fullWidth style={{color: listName.length < 2 && '#bdc3c7', borderColor: listName.length < 2 && '#bdc3c7' ,marginTop: '20px',marginBottom: '20px', cursor: listName.length < 2 && 'not-allowed'}} color='secondary' variant='outlined' onClick={listName.length > 1 && handleRandomName}>Pick random name(s)</Button>
+          <Button fullWidth style={{color: listName.length < 2 && '#bdc3c7', borderColor: listName.length < 2 && '#bdc3c7' ,marginTop: '20px',marginBottom: '20px', cursor: listName.length < 2 && 'not-allowed'}} color='secondary' variant='outlined' onClick={listName.length > 1 ? handleRandomName : undefined}>Pick random name(s)</Button>
       </Grid>
     </Container>
     <Container component='div' maxWidth='lg'>
       <div style={{display: 'flex', flexGrow: '1', alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'}}>
       <Typography variant='h5'>Winners Name Picker</Typography>
-      {listWinner.length !== 0 &&
+      {/* {listWinner.length !== 0 &&
         <ClearResults onClick={() => setListWinner([])} style={{display: 'inline', justifyContent: 'end', fontWeight: 'normal', fontStyle: 'italic'}}>Clear results <span style={{color: 'blue'}}>X</span></ClearResults>
-      }
+      } */}
       </div>
       {listWinner.length === 0 && <Typography display='block' variant='body1'>Empty</Typography>}
     </Container>
@@ -360,23 +385,15 @@ export default function Index() {
       listWinner.map((val, index) => {
         return (
           <Container key={index}>
-            {index === 0 ?
-              <div style={{padding: '10px', borderRadius: '20px', backgroundColor: '#f54748', marginBottom: '20px'}}>
-                <ResultNameWinner listWinner={listWinner} index={index}/>
+            {index !== 0 ?
+              <div style={{marginBottom: '20px', padding: '10px', borderColor: 'black', borderStyle: 'solid', borderRadius: '20px', borderWidth: '0.5px'}}>
+                <AfterNameWinner listWinner={listWinner} index={index}/>
                 <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                  <Typography display='inline' variant='h6' style={{color: 'white', marginTop: '10px'}}>Total names: {listWinner[listWinner.length-index-1].length}</Typography>
-                  <Typography display='inline' variant='h6' style={{color: 'white', marginTop: '10px'}}>{listWinner[listWinner.length-index-1].dateTime}</Typography>
+                  <Typography display='inline' variant='body1'>Total winners: {listWinner[listWinner.length-index-1].result.length}</Typography>
+                  <Typography display='inline' variant='body1'>{listWinner[listWinner.length-index-1].dateTime}</Typography>
                 </div>
               </div>
-            : 
-            <div style={{marginBottom: '20px', padding: '10px', borderColor: 'black', borderStyle: 'solid', borderRadius: '20px', borderWidth: '0.5px'}}> 
-              {/* <Typography style={{marginBottom: '10px', fontWeight: 'bold'}} variant='body1'>{listWinner[listWinner.length-index-1].result}</Typography> */}
-              <AfterNameWinner listWinner={listWinner} index={index}/>
-              <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Typography display='inline' variant='body1'>Total names: {listWinner[listWinner.length-index-1].length}</Typography>
-                <Typography display='inline' variant='body1'>{listWinner[listWinner.length-index-1].dateTime}</Typography>
-              </div>
-            </div>
+            : <div/>
             }
           </Container>
         )
